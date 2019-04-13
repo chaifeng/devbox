@@ -12,6 +12,7 @@
       with_dict: "{{ local_env | default({}) }}"
       notify: Restart Snapd
       become: yes
+    - meta: flush_handlers
     - name: Ensure Useful Packages
       apt:
         update_cache: yes
