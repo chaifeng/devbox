@@ -27,6 +27,23 @@
             - fonts-noto
             - xsel
       become: yes
+    - name: Ensure Libraries for Building Emacs 26
+      apt:
+        update_cache: yes
+        cache_valid_time: "{{ 3600*24*3 }}"
+        name:
+            - libgtk-3-dev # for building emacs
+            - libwebkitgtk-3.0-dev # for building emacs
+            - libxpm-dev
+            - libxpm-dev
+            - libjpeg-dev
+            - libgif-dev
+            - libtiff5-dev
+            - libgnutls28-dev
+            - libtinfo-dev
+            - libncurses5-dev
+            - libvterm-dev
+      become: yes
     - name: Ensure Snap Packages
       snap:
         name:
