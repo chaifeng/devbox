@@ -29,6 +29,7 @@
             - vim
             - curl
             - fonts-noto
+            - xsel
       become: yes
     - name: Ensure Snap Packages
       snap:
