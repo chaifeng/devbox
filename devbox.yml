@@ -2,6 +2,8 @@
 ---
 - name: Ubuntu
   hosts: localhost
+  vars:
+    hub_version: 2.11.1
   environment: "{{ local_env | default({}) }}"
   pre_tasks:
     - name: Change /etc/environment
@@ -45,10 +47,28 @@
             - libvterm-dev
       become: yes
     - name: Ensure Snap Packages
+      become: yes
       snap:
         name:
           - jq
+    - name: Ensure Snap Packages Classic
       become: yes
+      snap:
+        classic: yes
+        name:
+          - google-cloud-sdk
+    - name: Ensure Hub
+      become: yes
+      shell: |
+        set -euo pipefail
+        cd "$(mktemp -d)"
+        wget https://github.com/github/hub/releases/download/v{{ hub_version }}/hub-linux-amd64-{{ hub_version }}.tgz
+        tar zxf hub-linux-amd64-{{ hub_version }}.tgz
+        cd hub-linux-amd64-{{ hub_version }}
+        ./install
+        ln -s /usr/local/bin/hub /usr/local/bin/hub-{{ hub_version }}
+      args:
+        creates: /usr/local/bin/hub-{{ hub_version }}
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted
