@@ -1,0 +1,46 @@
+#!/usr/bin/env ansible-playbook
+---
+- name: Ubuntu
+  hosts: localhost
+  vars:
+    local_env:
+      http_proxy: http://192.168.77.1:3128
+      https_proxy: http://192.168.77.1:3128
+      all_proxy: socks5h://192.168.77.1:1080
+  environment: "{{ local_env }}"
+  pre_tasks:
+    - name: Change /etc/environment
+      lineinfile:
+          path: /etc/environment
+          regexp: "^{{ item.key }}=.+"
+          line: "{{ item.key }}={{ item.value }}"
+      with_dict: "{{ local_env }}"
+      notify: Restart Snapd
+      become: yes
+    - name: Ensure Useful Packages
+      apt:
+        update_cache: yes
+        cache_valid_time: "{{ 3600*24*3 }}"
+        name:
+            - net-tools
+            - zsh
+            - git
+            - openssh-server
+            - vim
+            - curl
+            - fonts-noto
+      become: yes
+  handlers:
+      - name: Restart Snapd
+        systemd: name=snapd state=restarted
+        become: yes
+  tasks:
+    - name: Ensure .vimrc
+      get_url:
+        url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
+        dest: ~/.vimrc
+    - name: Ensure Oh My Zsh
+      shell: |
+        sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+      args:
+        creates: $HOME/.oh-my-zsh/oh-my-zsh.sh
