@@ -2,19 +2,14 @@
 ---
 - name: Ubuntu
   hosts: localhost
-  vars:
-    local_env:
-      http_proxy: http://192.168.77.1:3128
-      https_proxy: http://192.168.77.1:3128
-      all_proxy: socks5h://192.168.77.1:1080
-  environment: "{{ local_env }}"
+  environment: "{{ local_env | default({}) }}"
   pre_tasks:
     - name: Change /etc/environment
       lineinfile:
           path: /etc/environment
           regexp: "^{{ item.key }}=.+"
           line: "{{ item.key }}={{ item.value }}"
-      with_dict: "{{ local_env }}"
+      with_dict: "{{ local_env | default({}) }}"
       notify: Restart Snapd
       become: yes
     - name: Ensure Useful Packages
@@ -43,10 +38,7 @@
   tasks:
     - name: Git Config
       git_config: name="{{item.key}}" value="{{item.value}}" scope=global
-      with_dict:
-        user.email: chaifeng@chaifeng.com
-        user.name: Chai Feng
-        commit.gpgsign: "true"
+      with_dict: "{{ git_config | default({}) }}"
     - name: Ensure .vimrc
       get_url:
         url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim

@@ -10,4 +10,8 @@ if ! ansible --version | grep -F "ansible $ansible_version"; then
   pip3 install ansible=="$ansible_version"
 fi
 
-ansible-playbook --ask-become-pass -l localhost ./devbox.yml
+declare -a ansible_opts=(-l localhost)
+[[ -f private.yml ]] && ansible_opts+=(-e @private.yml)
+
+sudo id "$USER"
+ansible-playbook "${ansible_opts[@]}" ./devbox.yml
