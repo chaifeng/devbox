@@ -30,6 +30,11 @@
             - curl
             - fonts-noto
       become: yes
+    - name: Ensure Snap Packages
+      snap:
+        name:
+          - jq
+      become: yes
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted
