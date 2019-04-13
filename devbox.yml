@@ -41,6 +41,12 @@
         systemd: name=snapd state=restarted
         become: yes
   tasks:
+    - name: Git Config
+      git_config: name="{{item.key}}" value="{{item.value}}" scope=global
+      with_dict:
+        user.email: chaifeng@chaifeng.com
+        user.name: Chai Feng
+        commit.gpgsign: "true"
     - name: Ensure .vimrc
       get_url:
         url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
