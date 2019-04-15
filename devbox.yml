@@ -69,6 +69,7 @@
         ln -s /usr/local/bin/hub /usr/local/bin/hub-{{ hub_version }}
       args:
         creates: /usr/local/bin/hub-{{ hub_version }}
+        executable: /bin/bash
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted
@@ -83,6 +84,10 @@
         dest: ~/.vimrc
     - name: Ensure Oh My Zsh
       shell: |
+        export SHELL=/bin/zsh
         sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
       args:
         creates: $HOME/.oh-my-zsh/oh-my-zsh.sh
+    - name: Change The Default Shell to Zsh
+      user: name="{{ansible_user}}" shell=/bin/zsh
+      become: yes
