@@ -46,6 +46,20 @@
             - libncurses5-dev
             - libvterm-dev
       become: yes
+    - name: Building Emacs
+      become: yes
+      shell: |
+        set -e
+        cd "$(mktemp -d)"
+        wget https://ftp.gnu.org/gnu/emacs/emacs-26.2.tar.xz
+        tar -xf emacs-26.2.tar.xz
+        cd emacs-26.2
+        ./configure
+        make
+        make install
+      args:
+        creates: /usr/local/bin/emacs
+        executable: /bin/bash
     - name: Ensure Snap Packages
       become: yes
       snap:
