@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-ansible_version="2.8.0a1"
+ansible_version="2.8.0b1"
 
 cd "${0%/*}"
 PATH="$HOME/.local/bin:$PATH"
