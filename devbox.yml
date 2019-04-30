@@ -28,6 +28,8 @@
             - curl
             - fonts-noto
             - xsel
+            - peco
+            - silversearcher-ag
       become: yes
     - name: Ensure Libraries for Building Emacs 26
       apt:
