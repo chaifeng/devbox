@@ -4,6 +4,7 @@
   hosts: localhost
   vars:
     hub_version: 2.11.1
+    bazel_version: 0.25.0
   environment: "{{ local_env | default({}) }}"
   pre_tasks:
     - name: Change /etc/environment
@@ -86,6 +87,17 @@
       args:
         creates: /usr/local/bin/hub-{{ hub_version }}
         executable: /bin/bash
+    - name: Ensure Bazel {{ bazel_version }}
+      become: yes
+      get_url: >
+          url="https://github.com/bazelbuild/bazel/releases/download/{{bazel_version}}/bazel-{{bazel_version}}-linux-x86_64"
+          dest="/usr/bin/bazel-real-{{bazel_version}}"
+          mode=a+x
+      tags: bazel
+    - name: Using the bazel {{bazel_version}} as default
+      become: yes
+      file: path=/usr/bin/bazel-real src="/usr/bin/bazel-real-{{bazel_version}}" state=link
+      tags: bazel
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted

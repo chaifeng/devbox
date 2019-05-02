@@ -15,4 +15,4 @@ declare -a ansible_opts=(-l localhost)
 [[ -f private.yml ]] && ansible_opts+=(-e @private.yml)
 
 sudo id "$USER"
-ansible-playbook "${ansible_opts[@]}" ./devbox.yml
+ansible-playbook "${ansible_opts[@]}" ./devbox.yml "$@"
