@@ -2,6 +2,7 @@
 ---
 - name: Ubuntu
   hosts: localhost
+  become: yes
   vars:
     hub_version: 2.11.1
     ubuntu_packages:
@@ -28,25 +29,19 @@
           line: "{{ item.key }}={{ item.value }}"
       with_dict: "{{ local_env | default({}) }}"
       notify: Restart Snapd
-      become: yes
     - meta: flush_handlers
 
     - name: Ensure Useful Packages
       apt: update_cache=yes cache_valid_time="{{ 3600*24*3 }}" name="{{ubuntu_packages}}"
-      become: yes
     - name: Ensure Snap Packages
-      become: yes
       snap: name="{{snap_packages}}"
     - name: Ensure Snap Packages Classic
-      become: yes
       snap: classic=yes name="{{snap_classic_packages}}"
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted
-        become: yes
   roles:
     - role: make_install
-      become: yes
       make_install_archive: "https://github.com/github/hub/releases/download/v{{hub_version}}/hub-linux-amd64-{{hub_version}}.tgz"
       make_install_exists: "/usr/local/bin/hub-{{hub_version}}.bin"
       make_install_command: |
@@ -59,16 +54,18 @@
     - role: emacs
       when: emacs_version != ""
       tags: emacs
-      become: yes
   tasks:
     - name: Git Config
+      become: no
       git_config: name="{{item.key}}" value="{{item.value}}" scope=global
       with_dict: "{{ git_config | default({}) }}"
     - name: Ensure .vimrc
+      become: no
       get_url:
         url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
         dest: ~/.vimrc
     - name: Spacemacs
+      become: no
       shell: |
         set -euo pipefail
         [[ -d ~/.emacs.d ]] && rm -rf ~/.emacs.d
@@ -88,6 +85,7 @@
         creates: $HOME/.emacs.d/private/.done
         executable: /bin/bash
     - name: Ensure Oh My Zsh
+      become: no
       shell: |
         export SHELL=/bin/zsh
         sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
