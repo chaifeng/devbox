@@ -1,0 +1,7 @@
+- name: Ensure Git
+  apt: name=git
+  become: yes
+
+- name: Git Config
+  git_config: name="{{item.key}}" value="{{item.value}}" scope=global
+  with_dict: "{{git_config}}"

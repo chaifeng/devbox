@@ -55,11 +55,9 @@
       become: no
       when: emacs_version is defined
       tags: emacs
-  tasks:
-    - name: Git Config
+    - role: git
       become: no
-      git_config: name="{{item.key}}" value="{{item.value}}" scope=global
-      with_dict: "{{ git_config | default({}) }}"
+  tasks:
     - name: Ensure .vimrc
       become: no
       get_url:
