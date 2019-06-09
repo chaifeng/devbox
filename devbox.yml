@@ -4,6 +4,21 @@
   hosts: localhost
   vars:
     hub_version: 2.11.1
+    ubuntu_packages:
+      - net-tools
+      - zsh
+      - git
+      - openssh-server
+      - vim
+      - curl
+      - fonts-noto
+      - xsel
+      - peco
+      - silversearcher-ag
+    snap_packages:
+      - jq
+    snap_classic_packages:
+      - google-cloud-sdk
   environment: "{{ local_env | default({}) }}"
   pre_tasks:
     - name: Change /etc/environment
@@ -15,33 +30,16 @@
       notify: Restart Snapd
       become: yes
     - meta: flush_handlers
+
     - name: Ensure Useful Packages
-      apt:
-        update_cache: yes
-        cache_valid_time: "{{ 3600*24*3 }}"
-        name:
-            - net-tools
-            - zsh
-            - git
-            - openssh-server
-            - vim
-            - curl
-            - fonts-noto
-            - xsel
-            - peco
-            - silversearcher-ag
+      apt: update_cache=yes cache_valid_time="{{ 3600*24*3 }}" name="{{ubuntu_packages}}"
       become: yes
     - name: Ensure Snap Packages
       become: yes
-      snap:
-        name:
-          - jq
+      snap: name="{{snap_packages}}"
     - name: Ensure Snap Packages Classic
       become: yes
-      snap:
-        classic: yes
-        name:
-          - google-cloud-sdk
+      snap: classic=yes name="{{snap_classic_packages}}"
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted
