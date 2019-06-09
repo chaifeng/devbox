@@ -51,8 +51,9 @@
     - role: bazel
       when: bazel_version != ""
       tags: bazel
-    - role: emacs
-      when: emacs_version != ""
+    - role: spacemacs
+      become: no
+      when: emacs_version is defined
       tags: emacs
   tasks:
     - name: Git Config
@@ -64,26 +65,6 @@
       get_url:
         url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
         dest: ~/.vimrc
-    - name: Spacemacs
-      become: no
-      shell: |
-        set -euo pipefail
-        [[ -d ~/.emacs.d ]] && rm -rf ~/.emacs.d
-        [[ -f ~/.spacemacs ]] && rm ~/.spacemacs
-        declare -a layers=(emacs-lisp rust csv better-defaults
-                           clojure common-lisp git github markdown
-                           javascript python ruby c-c++ shell-scripts
-                           react ruby-on-rails yaml vagrant ansible
-                           sql dash syntax-checking version-control)
-        git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
-        sed -E -e /dotspacemacs-editing-style/s/vim/emacs/ \
-            -e "/^\\s+emacs-lisp\\s*\$/s/emacs-lisp/${layers[*]}/" \
-            ~/.emacs.d/core/templates/.spacemacs.template > ~/.spacemacs
-        emacs --batch --load ~/.emacs.d/init.el
-        touch ~/.emacs.d/private/.done
-      args:
-        creates: $HOME/.emacs.d/private/.done
-        executable: /bin/bash
     - name: Ensure Oh My Zsh
       become: no
       shell: |
