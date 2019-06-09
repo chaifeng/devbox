@@ -4,7 +4,6 @@
   hosts: localhost
   vars:
     hub_version: 2.11.1
-    bazel_version: 0.25.0
   environment: "{{ local_env | default({}) }}"
   pre_tasks:
     - name: Change /etc/environment
@@ -32,37 +31,6 @@
             - peco
             - silversearcher-ag
       become: yes
-    - name: Ensure Libraries for Building Emacs 26
-      apt:
-        update_cache: yes
-        cache_valid_time: "{{ 3600*24*3 }}"
-        name:
-            - libgtk-3-dev # for building emacs
-            - libwebkitgtk-3.0-dev # for building emacs
-            - libxpm-dev
-            - libxpm-dev
-            - libjpeg-dev
-            - libgif-dev
-            - libtiff5-dev
-            - libgnutls28-dev
-            - libtinfo-dev
-            - libncurses5-dev
-            - libvterm-dev
-      become: yes
-    - name: Building Emacs
-      become: yes
-      shell: |
-        set -e
-        cd "$(mktemp -d)"
-        wget https://ftp.gnu.org/gnu/emacs/emacs-26.2.tar.xz
-        tar -xf emacs-26.2.tar.xz
-        cd emacs-26.2
-        ./configure
-        make
-        make install
-      args:
-        creates: /usr/local/bin/emacs
-        executable: /bin/bash
     - name: Ensure Snap Packages
       become: yes
       snap:
@@ -74,34 +42,26 @@
         classic: yes
         name:
           - google-cloud-sdk
-    - name: Ensure Hub
-      become: yes
-      shell: |
-        set -euo pipefail
-        cd "$(mktemp -d)"
-        wget https://github.com/github/hub/releases/download/v{{ hub_version }}/hub-linux-amd64-{{ hub_version }}.tgz
-        tar zxf hub-linux-amd64-{{ hub_version }}.tgz
-        cd hub-linux-amd64-{{ hub_version }}
-        ./install
-        ln -s /usr/local/bin/hub /usr/local/bin/hub-{{ hub_version }}
-      args:
-        creates: /usr/local/bin/hub-{{ hub_version }}
-        executable: /bin/bash
-    - name: Ensure Bazel {{ bazel_version }}
-      become: yes
-      get_url: >
-          url="https://github.com/bazelbuild/bazel/releases/download/{{bazel_version}}/bazel-{{bazel_version}}-linux-x86_64"
-          dest="/usr/bin/bazel-real-{{bazel_version}}"
-          mode=a+x
-      tags: bazel
-    - name: Using the bazel {{bazel_version}} as default
-      become: yes
-      file: path=/usr/bin/bazel-real src="/usr/bin/bazel-real-{{bazel_version}}" state=link
-      tags: bazel
   handlers:
       - name: Restart Snapd
         systemd: name=snapd state=restarted
         become: yes
+  roles:
+    - role: make_install
+      become: yes
+      make_install_archive: "https://github.com/github/hub/releases/download/v{{hub_version}}/hub-linux-amd64-{{hub_version}}.tgz"
+      make_install_exists: "/usr/local/bin/hub-{{hub_version}}.bin"
+      make_install_command: |
+        cd hub-linux-amd64-{{ hub_version }}
+        ./install
+        ln -s /usr/local/bin/hub /usr/local/bin/hub-{{ hub_version }}.bin
+    - role: bazel
+      when: bazel_version != ""
+      tags: bazel
+    - role: emacs
+      when: emacs_version != ""
+      tags: emacs
+      become: yes
   tasks:
     - name: Git Config
       git_config: name="{{item.key}}" value="{{item.value}}" scope=global

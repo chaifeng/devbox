@@ -1,0 +1,24 @@
+- name: Check if the file "{{make_install_exists}}" exists
+  stat: path="{{make_install_exists}}"
+  register: make_install_exists_result
+
+- block:
+    - name: Create a temporary directory
+      tempfile: state=directory
+      register: make_install_tmpdir
+
+    - name: Extract source code
+      unarchive:
+        src: "{{make_install_archive}}"
+        dest: "{{make_install_tmpdir.path}}"
+        remote_src: true
+
+    - name: Make install
+      shell: |
+        set -euo pipefail
+        {{make_install_command}}
+      args:
+        chdir: "{{make_install_tmpdir.path}}"
+        executable: /bin/bash
+        creates: "{{make_install_exists}}"
+  when: not make_install_exists_result.stat.exists

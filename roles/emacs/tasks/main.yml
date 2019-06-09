@@ -1,0 +1,26 @@
+- name: Ensure Libraries for Building Emacs {{emacs_version}}
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{ 3600*24*3 }}"
+    name:
+        - libgtk-3-dev # for building emacs
+        - libwebkitgtk-3.0-dev # for building emacs
+        - libxpm-dev
+        - libxpm-dev
+        - libjpeg-dev
+        - libgif-dev
+        - libtiff5-dev
+        - libgnutls28-dev
+        - libtinfo-dev
+        - libncurses5-dev
+        - libvterm-dev
+- name: Building Emacs {{emacs_version}}
+  include_role: name=make_install
+  vars:
+    make_install_archive: "https://ftpmirror.gnu.org/emacs/emacs-{{emacs_version}}.tar.xz"
+    make_install_exists: /usr/local/bin/emacs
+    make_install_command: |
+      cd emacs-{{emacs_version}}
+      ./configure
+      make
+      make install
