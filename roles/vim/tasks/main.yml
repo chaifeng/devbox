@@ -1,0 +1,8 @@
+- name: Ensure VIM
+  apt: name=vim
+  become: yes
+
+- name: Ensure .vimrc
+  get_url:
+    url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
+    dest: ~/.vimrc

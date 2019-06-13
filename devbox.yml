@@ -57,12 +57,9 @@
       tags: emacs
     - role: git
       become: no
-  tasks:
-    - name: Ensure .vimrc
+    - role: vim
       become: no
-      get_url:
-        url: https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
-        dest: ~/.vimrc
+  tasks:
     - name: Ensure Oh My Zsh
       become: no
       shell: |
