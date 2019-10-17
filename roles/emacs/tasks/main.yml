@@ -18,7 +18,7 @@
   include_role: name=make_install
   vars:
     make_install_archive: "https://ftpmirror.gnu.org/emacs/emacs-{{emacs_version}}.tar.xz"
-    make_install_exists: /usr/local/bin/emacs
+    make_install_exists: "/usr/local/bin/emacs-{{emacs_version}}"
     make_install_command: |
       cd emacs-{{emacs_version}}
       ./configure
